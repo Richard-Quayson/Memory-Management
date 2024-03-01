@@ -284,20 +284,20 @@ int accessMemory(Process* process, int page_id) {
 }
 
 // Function to translate all virtual addresses of a process to physical addresses
-char* translateVirtualToPhysicalAddress(PhysicalMemory* pm, char* virtualAddress, int processId) {
+void translateVirtualToPhysicalAddress(PhysicalMemory* pm, char* virtualAddress, int processId) {
     int pageId, offset;
     char physicalAddress[20];       // Assuming this is large enough for the physical address format
 
     // Validate and parse the virtual address
     if (sscanf(virtualAddress, "0vp%ds%d", &pageId, &offset) != 2) {
         printf("Invalid virtual address format.\n");
-        return NULL;
+        return;
     }
 
     Process* process = findProcessById(processId);
     if (!process) {
         printf("Process with ID %d not found.\n", processId);
-        return NULL;
+        return;
     }
 
     // Lookup the page in the process's page table to find its frame number
@@ -322,32 +322,26 @@ char* translateVirtualToPhysicalAddress(PhysicalMemory* pm, char* virtualAddress
         if (choice == 'y' || choice == 'Y') {
             allocatePagesToPhysicalMemory(process, pm);
         } else {
-            return NULL;
+            return;
         }
 
         // Print the physical memory allocation after handling the page fault
         printf("\nPhysical Memory after handling page fault:\n---------------------------");
         printAllocatedFrameMemory(pm);
 
-        // Allocate array of strings to hold physical addresses for each page
-        char** physicalAddresses = malloc(NUM_PAGES * sizeof(char*));
-        if (!physicalAddresses) return NULL;
-
+        printf("\n");       // newline
+        // Print the physical address for the pages in the process
         for (int i = 0; i < process->mpt->count; i++) {
             for (int j = 0; j < (process->mpt->tables[i]->size + PAGE_SIZE - 1) / PAGE_SIZE; j++) {
-                PageTableEntry entry = process->mpt->tables[i]->entries[j];
-                physicalAddresses[entry.page_num] = malloc(20 * sizeof(char)); // Assuming size is enough for address format
-                snprintf(physicalAddresses[entry.page_num], 20, "0pf%ds0", entry.frame_num);
+                if (process->mpt->tables[i]->entries[j].frame_num != -1) {
+                    printf("Physical address for virtual address '0vp%ds%d' of process ID %d: 0pf%ds%d\n", process->mpt->tables[i]->entries[j].page_num, offset, processId, process->mpt->tables[i]->entries[j].frame_num, offset);
+                }
             }
         }
 
     } else {
-        // Construct the physical address
-        snprintf(physicalAddress, sizeof(physicalAddress), "0pf%ds%d", frameNum, offset);
-        
-        // Return a copy of the physical address
-        char* result = malloc(strlen(physicalAddress) + 1);
-        strcpy(result, physicalAddress);
+        // Print the physical address for the given virtual address
+        printf("Physical address for virtual address '%s' of process ID %d: 0pf%ds%d\n", virtualAddress, processId, frameNum, offset);
     }
 }
 
