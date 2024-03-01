@@ -24,7 +24,7 @@ Functions (5 pts):
         []  for address translation from virtual to physical adresses       ->      [Asher]
         [done]  for page allocation                                             ->      [Fredrick]
         [done]  for page deallocation                                           ->      [Fredrick]
-        []  to handle page faults                                           ->      [Richard]
+        [done]  to handle page faults                                           ->      [Richard]
         [done]  to track free frames                                            ->      [Richard]
         [done]  to track allocated frames                                       ->      [Richard]
 
@@ -43,7 +43,7 @@ Page Table (2 pts):
         functionality                                                       ->      [Fredrick]
 
 Error Handling (2 pts):
-    []  handle page faults by simulating fetching the required page 
+    [done]  handle page faults by simulating fetching the required page 
         from secondary storage                                              ->      [Asher]
 
 Accounting Information (2 pts):                                             ->      [Richard]
