@@ -39,7 +39,7 @@ void printProcess(const Process* process);
 int findFreeFrame(PhysicalMemory* pm);
 void allocatePagesToPhysicalMemory(Process* process, PhysicalMemory* pm);
 void deallocatePagesFromPhysicalMemory(Process* process, PhysicalMemory* pm);
-void accessMemory(Process* process, int page_id);
+int accessMemory(Process* process, int page_id);
 void displayStatistics(VirtualMemory* vm, PhysicalMemory* pm);
 
 #endif // PAGE_TABLE_H

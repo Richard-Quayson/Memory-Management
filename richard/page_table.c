@@ -254,7 +254,7 @@ void deallocatePagesFromPhysicalMemory(Process* process, PhysicalMemory* pm) {
 }
 
 // Function to access a process's frame in physical memory
-void accessMemory(Process* process, int page_id) {
+int accessMemory(Process* process, int page_id) {
     num_accesses++;  // Increment the number of memory access attempts
 
     // Iterate through the MasterPageTable to find the PageTableEntry for the given page_id
@@ -266,11 +266,12 @@ void accessMemory(Process* process, int page_id) {
                 if (entry->frame_num == -1) {  // Page fault occurs if frame_num is -1
                     page_faults++;  // Increment the global page_faults counter
                     printf("Page fault occurred for page ID %d in process ID %d.\n", page_id, process->id);
+                    return -1;
                 } else {
                     // Successfully accessed the page in physical memory
                     printf("Successfully accessed frame %d for page ID %d in process ID %d.\n", entry->frame_num, page_id, process->id);
                 }
-                return;  // Exit after handling the page access
+                return 0;  // Exit after handling the page access
             }
         }
     }

@@ -32,7 +32,7 @@ The Package (5 pts):
     create C program that would allow a user:
         [done]  to create processes                                             ->      [Asher]
         [done]  allocate the processes to the memory pages defined              ->      [Fredrick]
-        []  to perform basic memory management defined by the functions     ->      [Richard]
+        [done]  to perform basic memory management defined by the functions     ->      [Richard]
 
 Memory Address Creation (2 pts):
     []  simulate process accessing memory by generating random 
@@ -47,11 +47,11 @@ Error Handling (2 pts):
         from secondary storage                                              ->      [Asher]
 
 Accounting Information (2 pts):                                             ->      [Richard]
-    []  track statistics like memory utilisation, page faults and hit rate      
-    []  display the tracked statistics
+    [done]  track statistics like memory utilisation, page faults and hit rate      
+    [done]  display the tracked statistics
 
 System Evaluation (2 pts):                                                  ->      [Asher, Fredrick, Richard]
-    []  ensure the program can be tested with different workloads (varying process)
+    [done]  ensure the program can be tested with different workloads (varying process)
         sizes and memory access patterns
 
 Page Replacement Algorithms (2 pts):

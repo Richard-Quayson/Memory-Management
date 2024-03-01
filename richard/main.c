@@ -15,7 +15,7 @@ void menu() {
     printf("4. Allocate Pages to Physical Memory\n");
     printf("5. Deallocate Pages from Physical Memory\n");
     printf("6. Access Memory\n");
-
+    printf("7. Display Statistics\n");
     printf("8. Print Allocated Virtual Memory\n");
     printf("9. Print Allocated Physical Memory\n");
     printf("10. Print Virtual Memory\n");
@@ -50,7 +50,7 @@ int main() {
                     printf("Process ID %d already exists. Please enter a different ID.\n", id);
                     break;
                 }
-                
+
                 printf("Enter memory size (in bytes): ");
                 scanf("%d", &memorySize);
 
@@ -131,7 +131,25 @@ int main() {
                     printf("\nEnter the Page ID you wish to access: ");
                     int pageId;
                     scanf("%d", &pageId);
-                    accessMemory(process, pageId); // This function internally increments num_accesses
+                    int accessResult = accessMemory(process, pageId); // This function internally increments num_accesses
+
+                    // result of access is -1 if page fault occurs, 
+                    // handle it by asking the user if they want to allocate the page to physical memory
+                    // if yes, call allocatePagesToPhysicalMemory function
+
+                    if (accessResult == -1) {
+                        printf("Do you want to allocate the page to physical memory? (y/n): ");
+                        char choice;
+                        scanf(" %c", &choice);
+                        if (choice == 'y' || choice == 'Y') {
+                            allocatePagesToPhysicalMemory(process, pm);
+                        }
+                    }
+                    
+                    // print the physical memory allocation after the handling of page fault
+                    printf("\nPhysical Memory after handling page fault:\n---------------------------");
+                    printAllocatedFrameMemory(pm);
+
                 } else {
                     printf("\nProcess ID %d not found.\n", pid3);
                 }

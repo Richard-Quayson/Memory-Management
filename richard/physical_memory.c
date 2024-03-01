@@ -49,7 +49,7 @@ void freeMemory(VirtualMemory* vm, PhysicalMemory* pm) {
 // Function to print the values in virtual memory
 void printVirtualMemory(const VirtualMemory* vm) {
     if (vm == NULL) {
-        printf("Virtual Memory is not initialized.\n");
+        printf("\nVirtual Memory is not initialized.\n");
         return;
     }
 
@@ -66,7 +66,7 @@ void printVirtualMemory(const VirtualMemory* vm) {
 // Function to print the values in physical memory
 void printPhysicalMemory(const PhysicalMemory* pm) {
     if (pm == NULL) {
-        printf("Physical Memory is not initialized.\n");
+        printf("\nPhysical Memory is not initialized.\n");
         return;
     }
 
@@ -85,7 +85,7 @@ void printAllocatedVirtualMemory(const VirtualMemory* vm) {
     int allocatedPagesFound = 0;
     for (unsigned long long i = 0; i < NUM_PAGES; i++) {
         if (vm->pages[i].is_allocated) {
-            printf("Allocated Virtual Page: %d\n", vm->pages[i].id);
+            printf("\nAllocated Virtual Page: %d\n", vm->pages[i].id);
             // Print details about allocated chunks within this page
             for (int j = 0; j < PAGE_SIZE / KB; j++) {
                 if (vm->pages[i].chunks[j].is_allocated) {
@@ -105,7 +105,7 @@ void printAllocatedFrameMemory(const PhysicalMemory* pm) {
     int allocatedFramesFound = 0;
     for (unsigned long long i = 0; i < NUM_FRAMES; i++) {
         if (pm->frames[i].is_allocated) {
-            printf("Allocated Physical Frame: %d\n", pm->frames[i].id);
+            printf("\nAllocated Physical Frame: %d\n", pm->frames[i].id);
             // Print details about allocated chunks within this frame
             for (int j = 0; j < FRAME_SIZE / KB; j++) {
                 if (pm->frames[i].chunks[j].is_allocated) {
