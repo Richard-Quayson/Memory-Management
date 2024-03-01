@@ -3,6 +3,13 @@
 #include "virtual_memory.h"
 
 
+// Global variables defined in main.c
+extern int page_faults;
+extern int num_accesses;
+extern Process* processes[MAX_PROCESSES];
+extern int processCount;
+
+
 // SecondaryPageTable allocation function
 SecondaryPageTable* allocateSecondaryPageTable(int memorySize) {
     int numEntries = (memorySize + PAGE_SIZE - 1) / PAGE_SIZE; // Number of pages needed
@@ -123,6 +130,17 @@ Process* create_process(int id, int memory_size, VirtualMemory* vm) {
     return process;
 }
 
+Process* findProcessById(int pid) {
+    Process* selectedProcess = NULL;
+    for (int i = 0; i < processCount; i++) {
+        if (processes[i]->id == pid) {
+            selectedProcess = processes[i];
+            break; // Exit the loop once the process is found
+        }
+    }
+    return selectedProcess; // Return the found process or NULL if not found
+}
+
 // Helper function to print the chunks array for a PageTableEntry
 void printChunks(const int chunks[], int size) {
     printf("[");
@@ -202,6 +220,8 @@ void allocatePagesToPhysicalMemory(Process* process, PhysicalMemory* pm) {
         }
     }
 
+    // update remaining_memory
+    pm->remaining_memory = pm->remaining_memory - process->memory_size;
     printf("\nPages allocated to physical memory for process %d.\n", process->id);
 }
 
@@ -228,5 +248,58 @@ void deallocatePagesFromPhysicalMemory(Process* process, PhysicalMemory* pm) {
         }
     }
 
+    // update remaining_memory
+    pm->remaining_memory = pm->remaining_memory + process->memory_size;
     printf("\nPages deallocated from physical memory for process %d.\n", process->id);
+}
+
+// Function to access a process's frame in physical memory
+void accessMemory(Process* process, int page_id) {
+    num_accesses++;  // Increment the number of memory access attempts
+
+    // Iterate through the MasterPageTable to find the PageTableEntry for the given page_id
+    for (int i = 0; i < process->mpt->count; i++) {
+        SecondaryPageTable* spt = process->mpt->tables[i];
+        for (int j = 0; j < (spt->size + PAGE_SIZE - 1) / PAGE_SIZE; j++) {
+            PageTableEntry* entry = &spt->entries[j];
+            if (entry->page_num == page_id) {  // Found the corresponding PageTableEntry
+                if (entry->frame_num == -1) {  // Page fault occurs if frame_num is -1
+                    page_faults++;  // Increment the global page_faults counter
+                    printf("Page fault occurred for page ID %d in process ID %d.\n", page_id, process->id);
+                } else {
+                    // Successfully accessed the page in physical memory
+                    printf("Successfully accessed frame %d for page ID %d in process ID %d.\n", entry->frame_num, page_id, process->id);
+                }
+                return;  // Exit after handling the page access
+            }
+        }
+    }
+
+    // If the page_id was not found in any PageTableEntry, it's considered an invalid access
+    printf("Invalid page ID %d access attempt in process ID %d.\n", page_id, process->id);
+}
+
+// Function to display memory management statistics
+void displayStatistics(VirtualMemory* vm, PhysicalMemory* pm) {
+    // Calculate hit rate as the ratio of successful accesses to total accesses
+    float hitRate = (num_accesses - page_faults) / (float)num_accesses * 100;
+
+    // Calculate the total and remaining memory in both virtual and physical memory spaces
+    int totalVirtualMemory = NUM_PAGES * PAGE_SIZE;
+    int usedVirtualMemory = totalVirtualMemory - vm->remaining_memory;
+
+    int totalPhysicalMemory = NUM_FRAMES * FRAME_SIZE;
+    int usedPhysicalMemory = totalPhysicalMemory - pm->remaining_memory;
+
+    // Display the statistics
+    printf("\nMemory Management Statistics:\n");
+    printf("Number of allocated pages in virtual memory: %llu\n", NUM_PAGES - (vm->remaining_memory / PAGE_SIZE));
+    printf("Number of frames in physical memory: %llu\n", NUM_FRAMES - (pm->remaining_memory / FRAME_SIZE));
+    printf("Number of accesses in physical memory: %d\n", num_accesses);
+    printf("Number of page faults: %d\n", page_faults);
+    printf("Hit rate: %.2f%%\n", hitRate);
+    printf("Total memory used in virtual memory: %d bytes\n", usedVirtualMemory);
+    printf("Remaining memory in virtual memory: %d bytes\n", vm->remaining_memory);
+    printf("Total memory used in physical memory: %d bytes\n", usedPhysicalMemory);
+    printf("Remaining memory in physical memory: %d bytes\n", pm->remaining_memory);
 }

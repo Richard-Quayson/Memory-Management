@@ -34,4 +34,7 @@
 // chunk size: 1KB
 #define CHUNK_SIZE (KB)
 
+// maximum number of processes
+#define MAX_PROCESSES 100
+
 #endif // MEMORY_CONFIG_H

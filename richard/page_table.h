@@ -7,7 +7,7 @@
 #ifndef PAGE_TABLE_H
 #define PAGE_TABLE_H
 
-#define SECONDARY_TABLE_SIZE (16 * MB)
+#define SECONDARY_TABLE_SIZE (4 * MB)
 
 
 typedef struct PageTableEntry {
@@ -34,9 +34,12 @@ typedef struct Process {
 } Process;
 
 Process* create_process(int id, int memory_size, VirtualMemory* vm);
+Process* findProcessById(int pid);
 void printProcess(const Process* process);
 int findFreeFrame(PhysicalMemory* pm);
 void allocatePagesToPhysicalMemory(Process* process, PhysicalMemory* pm);
-void allocatePagesToPhysicalMemory(Process* process, PhysicalMemory* pm);
+void deallocatePagesFromPhysicalMemory(Process* process, PhysicalMemory* pm);
+void accessMemory(Process* process, int page_id);
+void displayStatistics(VirtualMemory* vm, PhysicalMemory* pm);
 
 #endif // PAGE_TABLE_H
