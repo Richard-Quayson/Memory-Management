@@ -17,10 +17,12 @@ void menu() {
     printf("6. Access Memory\n");
     printf("7. Address Translation\n");
     printf("8. Display Statistics\n");
-    printf("9. Print Allocated Virtual Memory\n");
-    printf("10. Print Allocated Physical Memory\n");
-    printf("11. Print Virtual Memory\n");
-    printf("12. Print Physical Memory\n");
+    printf("9. Rrquest memory\n");
+    printf("10. Destroy Process\n");
+    printf("11. Print Allocated Virtual Memory\n");
+    printf("12. Print Allocated Physical Memory\n");
+    printf("13. Print Virtual Memory\n");
+    printf("14. Print Physical Memory\n");
     printf("-1. Exit\n");
     printf("Enter your choice: ");
 }
@@ -180,19 +182,51 @@ int main() {
                 displayStatistics(vm, pm);
                 break;
 
-            case 9:     // Print Allocated Virtual Memory
+            case 9:     // Request memory
+                printf("Enter process ID: ");
+                int pid5;
+                scanf("%d", &pid5);
+
+                // request additional memory for the process
+                printf("Enter the additional memory size (in bytes): ");
+                unsigned int additionalMemorySize;
+                scanf("%u", &additionalMemorySize);
+
+                requestAdditionalMemory(pid5, additionalMemorySize, vm, pm);
+                break;
+
+            case 10:    // Destroy Process
+                printf("Enter process ID: ");
+                int pid6;
+                scanf("%d", &pid6);
+                // get the index of the process in the processes array
+                int index;
+                for (index = 0; index < processCount; index++) {
+                    if (processes[index]->id == pid6) {
+                        break;
+                    }
+                }
+                destroy_process(pid6, vm, pm);
+                // remove the process from the processes array
+                for (int i = 0; i < processCount - 1; i++) {
+                    processes[i] = processes[i + 1];
+                }
+                processCount--;
+                break;
+
+            case 11:     // Print Allocated Virtual Memory
                 printAllocatedVirtualMemory(vm);
                 break;
 
-            case 10:     // Print Allocated Physical Memory
+            case 12:     // Print Allocated Physical Memory
                 printAllocatedFrameMemory(pm);
                 break;
                 
-            case 11:     // Print Virtual Memory
+            case 13:     // Print Virtual Memory
                 printVirtualMemory(vm);
                 break;
 
-            case 12:     // Print Physical Memory
+            case 14:     // Print Physical Memory
                 printPhysicalMemory(pm);
                 break;
 

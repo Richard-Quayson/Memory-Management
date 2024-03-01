@@ -58,7 +58,7 @@ void allocateChunksInPage(VirtualMemory* vm, int pageID, int chunksNeeded, PageT
     }
 }
 
-// Updated to reflect new allocation logic
+// Function to create a process and allocate memory for it in virtual memory
 Process* create_process(int id, int memory_size, VirtualMemory* vm) {
     if (!vm || memory_size <= 0 || memory_size > vm->remaining_memory) {
         printf("\nInsufficient virtual memory to create process.\n");
@@ -103,7 +103,6 @@ Process* create_process(int id, int memory_size, VirtualMemory* vm) {
                 int pageID = allocatePage(vm);
                 if (pageID == -1) {
                     printf("Failed to allocate enough virtual memory for the process.\n");
-                    // Cleanup code omitted for brevity
                     return NULL;
                 }
 
@@ -208,7 +207,7 @@ void allocatePagesToPhysicalMemory(Process* process, PhysicalMemory* pm) {
         for (int j = 0; j < (spt->size + PAGE_SIZE - 1) / PAGE_SIZE; j++) { // Iterate through page table entries
             PageTableEntry* entry = &spt->entries[j];
             if (entry->is_valid) {
-                int frameID = findFreeFrame(pm); // Assume this function finds a free frame and returns its ID, -1 if none found
+                int frameID = findFreeFrame(pm); // This function finds a free frame and returns its ID, -1 if none found
                 if (frameID != -1) {
                     entry->frame_num = frameID;
                     pm->frames[frameID].is_allocated = true; // Mark frame as allocated
@@ -368,4 +367,139 @@ void displayStatistics(VirtualMemory* vm, PhysicalMemory* pm) {
     printf("Remaining memory in virtual memory: %d bytes\n", vm->remaining_memory);
     printf("Total memory used in physical memory: %d bytes\n", usedPhysicalMemory);
     printf("Remaining memory in physical memory: %d bytes\n", pm->remaining_memory);
+}
+
+void requestAdditionalMemory(int processId, unsigned int additionalMemorySize, VirtualMemory* vm, PhysicalMemory* pm) {
+    Process* process = findProcessById(processId);
+    if (process == NULL) {
+        printf("Process with ID %d not found.\n", processId);
+        return;
+    }
+
+    if (additionalMemorySize > vm->remaining_memory || additionalMemorySize > pm->remaining_memory) {
+        printf("Insufficient virtual or physical memory available.\n");
+        return;
+    }
+
+    // get a free secondary page table that is not full
+    SecondaryPageTable* spt = NULL;
+    for (int i = 0; i < process->mpt->count; i++) {
+        if (process->mpt->tables[i]->size < SECONDARY_TABLE_SIZE) {
+            spt = process->mpt->tables[i];
+            break;
+        }
+    }
+
+    // if no free secondary page table is found, allocate a new one
+    if (spt == NULL) {
+        int newTableSize = (additionalMemorySize < SECONDARY_TABLE_SIZE) ? additionalMemorySize : SECONDARY_TABLE_SIZE;
+        spt = allocateSecondaryPageTable(newTableSize);
+        if (spt == NULL) {
+            printf("Failed to allocate memory for the new secondary page table.\n");
+            return;
+        }
+        process->mpt->tables[process->mpt->count++] = spt;
+    }
+
+    // allocate memory for the new pages
+    int remainingMemory = additionalMemorySize;
+
+    // loop should begin from the length of the entries array in the secondary page table
+    for (int i = spt->size / PAGE_SIZE; i < (spt->size + additionalMemorySize + PAGE_SIZE - 1) / PAGE_SIZE; i++) {
+        if (remainingMemory <= 0) break; // Stop if we've allocated enough memory
+        if (spt->entries[i].is_valid) continue; // Skip already allocated pages
+        int pageID = allocatePage(vm);
+        if (pageID == -1) {
+            printf("Failed to allocate enough virtual memory for the process.\n");
+            return;
+        }
+
+        // Initialize PageTableEntry for the current page
+        PageTableEntry* entry = &spt->entries[i];
+        entry->page_num = pageID; // Set the page number
+        entry->frame_num = -1; // Assuming no physical frame is allocated yet
+        entry->is_valid = true; // Mark as valid since we're allocating memory for it
+
+        // Calculate how many chunks are needed for this secondary table
+        int chunksNeeded = spt->size / CHUNK_SIZE + (spt->size % CHUNK_SIZE != 0);
+
+        // Allocate chunks within the allocated page
+        allocateChunksInPage(vm, pageID, chunksNeeded, entry);
+        chunksNeeded -= PAGE_SIZE / CHUNK_SIZE; // Update the number of chunks needed
+
+        // Update remainingMemory
+        remainingMemory -= PAGE_SIZE;
+    }
+
+    // Update process memory size
+    process->memory_size += additionalMemorySize;
+
+    // Update SecondaryPageTable size
+    spt->size += additionalMemorySize;
+
+    // Deallocate process memory from physical memory
+    deallocatePagesFromPhysicalMemory(process, pm);
+
+    // Allocate memory in physical memory
+    allocatePagesToPhysicalMemory(process, pm);
+
+    // Deduct the allocated memory from the remaining virtual and physical memory
+    vm->remaining_memory -= additionalMemorySize; // Assuming this simplification for demonstration
+    pm->remaining_memory -= additionalMemorySize; // This might need more complex management in a real scenario
+
+    printf("Additional memory allocated to process ID %d. Total memory: %u bytes.\n", processId, process->memory_size);
+}
+
+void freeVirtualPage(int pageID, VirtualMemory* vm) {
+    if (vm == NULL || pageID < 0 || pageID >= NUM_PAGES) {
+        printf("Invalid virtual memory or page ID.\n");
+        return;
+    }
+
+    // Mark the page as free in the virtual memory structure
+    vm->pages[pageID].is_allocated = false;
+
+    // Update the remaining memory in the virtual memory structure
+    vm->remaining_memory += PAGE_SIZE;
+}
+
+void freePhysicalFrame(int frameID, PhysicalMemory* pm) {
+    if (pm == NULL || frameID < 0 || frameID >= NUM_FRAMES) {
+        printf("Invalid physical memory or frame ID.\n");
+        return;
+    }
+
+    // Mark the frame as free in the physical memory structure
+    pm->frames[frameID].is_allocated = false;
+
+    // Update the remaining memory in the physical memory structure
+    pm->remaining_memory += FRAME_SIZE;
+}
+
+// Function to destroy a process and free its resources
+void destroy_process(int processId, VirtualMemory* vm, PhysicalMemory* pm) {
+    Process* process = findProcessById(processId);
+    if (process == NULL) {
+        printf("Process with ID %d not found.\n", processId);
+        return;
+    }
+
+    // Deallocate virtual memory
+    for (int i = 0; i < process->mpt->count; i++) {
+        SecondaryPageTable* spt = process->mpt->tables[i];
+        for (int j = 0; j < (spt->size + PAGE_SIZE - 1) / PAGE_SIZE; j++) {
+            PageTableEntry entry = spt->entries[j];
+            freeVirtualPage(entry.page_num, vm); // Free the virtual page
+            if (entry.frame_num != -1) {
+                freePhysicalFrame(entry.frame_num, pm); // Free the corresponding frame in physical memory
+            }
+            free(spt->entries); // Free the dynamic memory for page table entries
+        }
+        free(process->mpt->tables[i]); // Free the secondary page table itself
+    }
+    free(process->mpt->tables); // Free the array of secondary page tables
+    free(process->mpt); // Free the master page table structure
+    free(process); // Free the process structure itself
+
+    printf("Process ID %d destroyed and resources freed.\n", processId);
 }

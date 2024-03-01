@@ -42,5 +42,9 @@ void deallocatePagesFromPhysicalMemory(Process* process, PhysicalMemory* pm);
 int accessMemory(Process* process, int page_id);
 void translateVirtualToPhysicalAddress(PhysicalMemory* pm, char* virtualAddress, int processId);
 void displayStatistics(VirtualMemory* vm, PhysicalMemory* pm);
+void requestAdditionalMemory(int processId, unsigned int additionalMemorySize, VirtualMemory* vm, PhysicalMemory* pm);
+void freeVirtualPage(int pageID, VirtualMemory* vm);
+void freePhysicalFrame(int frameID, PhysicalMemory* pm);
+void destroy_process(int processId, VirtualMemory* vm, PhysicalMemory* pm);
 
 #endif // PAGE_TABLE_H
