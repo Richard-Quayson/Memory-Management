@@ -11,10 +11,13 @@ void menu() {
     printf("1. Create Process\n");
     printf("2. List Processes\n");
     printf("3. Print Process Details\n");
-    printf("4. Print Virtual Memory\n");
-    printf("5. Print Physical Memory\n");
-    printf("6. Print Allocated Virtual Memory\n");
-    printf("7. Print Allocated Physical Memory\n");
+    printf("4. Allocate Pages to Physical Memory\n");
+    printf("5. Deallocate Pages from Physical Memory\n");
+
+    printf("8. Print Allocated Virtual Memory\n");
+    printf("9. Print Allocated Physical Memory\n");
+    printf("10. Print Virtual Memory\n");
+    printf("11. Print Physical Memory\n");
     printf("-1. Exit\n");
     printf("Enter your choice: ");
 }
@@ -47,6 +50,7 @@ int main() {
                     processes[processCount++] = newProcess;
                 }
                 break;
+
             case 2:     // List Processes
                 if (processCount == 0) {
                     printf("\nNo processes created yet.\n");
@@ -57,6 +61,7 @@ int main() {
                     }
                 }
                 break;
+
             case 3:     // Print Process Details
                 printf("Enter process ID: ");
                 int pid;
@@ -70,21 +75,55 @@ int main() {
                 }
                 printProcess(selectedProcess);
                 break;
-            case 4:     // Print Virtual Memory
-                printVirtualMemory(vm);
+
+            case 4:     // Allocate Pages to Physical Memory
+                printf("Enter process ID: ");
+                int pid1;
+                scanf("%d", &pid1);
+                Process* selectedProcess1 = NULL;
+                for (int i = 0; i < processCount; i++) {
+                    if (processes[i]->id == pid1) {
+                        selectedProcess1 = processes[i];
+                        break;
+                    }
+                }
+                allocatePagesToPhysicalMemory(selectedProcess1, pm);
                 break;
-            case 5:     // Print Physical Memory
-                printPhysicalMemory(pm);
-                break;
-            case 6:     // Print Allocated Virtual Memory
+
+            case 5:     // Deallocate Pages from Physical Memory
+                printf("Enter process ID: ");
+                int pid2;
+                scanf("%d", &pid2);
+                Process* selectedProcess2 = NULL;
+                for (int i = 0; i < processCount; i++) {
+                    if (processes[i]->id == pid2) {
+                        selectedProcess2 = processes[i];
+                        break;
+                    }
+                }
+                deallocatePagesFromPhysicalMemory(selectedProcess2, pm);
+                break;            
+
+            case 8:     // Print Allocated Virtual Memory
                 printAllocatedVirtualMemory(vm);
                 break;
-            case 7:     // Print Allocated Physical Memory
+
+            case 9:     // Print Allocated Physical Memory
                 printAllocatedFrameMemory(pm);
                 break;
+                
+            case 10:     // Print Virtual Memory
+                printVirtualMemory(vm);
+                break;
+
+            case 11:     // Print Physical Memory
+                printPhysicalMemory(pm);
+                break;
+
             case -1:
                 printf("Exiting program.\n");
                 return 0; // Exit the program
+
             default:
                 printf("Invalid choice, please try again.\n");
         }

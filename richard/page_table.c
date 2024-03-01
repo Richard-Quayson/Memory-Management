@@ -169,3 +169,64 @@ void printProcess(const Process* process) {
     printf("    }\n");
     printf("}\n");
 }
+
+int findFreeFrame(PhysicalMemory* pm) {
+    for (int i = 0; i < NUM_FRAMES; i++) {
+        if (!pm->frames[i].is_allocated) {
+            return i;
+        }
+    }
+    return -1; // Indicate failure to find a free frame
+}
+
+void allocatePagesToPhysicalMemory(Process* process, PhysicalMemory* pm) {
+    if (!process || !pm) return;
+
+    for (int i = 0; i < process->mpt->count; i++) { // Iterate through secondary page tables
+        SecondaryPageTable* spt = process->mpt->tables[i];
+        for (int j = 0; j < (spt->size + PAGE_SIZE - 1) / PAGE_SIZE; j++) { // Iterate through page table entries
+            PageTableEntry* entry = &spt->entries[j];
+            if (entry->isvalid) {
+                int frameID = findFreeFrame(pm); // Assume this function finds a free frame and returns its ID, -1 if none found
+                if (frameID != -1) {
+                    entry->frame_num = frameID;
+                    pm->frames[frameID].is_allocated = true; // Mark frame as allocated
+                    // Copy chunk allocation details to the physical frame
+                    for (int chunk = 0; chunk < PAGE_SIZE / KB; chunk++) {
+                        if (entry->chunks[chunk] != -1) {
+                            pm->frames[frameID].chunks[chunk].is_allocated = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    printf("\nPages allocated to physical memory for process %d.\n", process->id);
+}
+
+void deallocatePagesFromPhysicalMemory(Process* process, PhysicalMemory* pm) {
+    if (!process || !pm) return;
+
+    for (int i = 0; i < process->mpt->count; i++) { // Iterate through secondary page tables
+        SecondaryPageTable* spt = process->mpt->tables[i];
+        for (int j = 0; j < (spt->size + PAGE_SIZE - 1) / PAGE_SIZE; j++) { // Iterate through page table entries
+            PageTableEntry* entry = &spt->entries[j];
+            if (entry->frame_num != -1) {
+                // Clear the physical frame
+                Frame* frame = &pm->frames[entry->frame_num];
+                frame->is_allocated = false;
+                for (int chunk = 0; chunk < PAGE_SIZE / KB; chunk++) {
+                    frame->chunks[chunk].is_allocated = false;
+                }
+                // Reset PageTableEntry
+                entry->frame_num = -1;
+                for (int chunk = 0; chunk < PAGE_SIZE / KB; chunk++) {
+                    entry->chunks[chunk] = -1; // Clear chunk allocation details
+                }
+            }
+        }
+    }
+
+    printf("\nPages deallocated from physical memory for process %d.\n", process->id);
+}

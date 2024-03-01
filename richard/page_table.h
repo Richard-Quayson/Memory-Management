@@ -35,5 +35,8 @@ typedef struct Process {
 
 Process* create_process(int id, int memory_size, VirtualMemory* vm);
 void printProcess(const Process* process);
+int findFreeFrame(PhysicalMemory* pm);
+void allocatePagesToPhysicalMemory(Process* process, PhysicalMemory* pm);
+void allocatePagesToPhysicalMemory(Process* process, PhysicalMemory* pm);
 
 #endif // PAGE_TABLE_H
