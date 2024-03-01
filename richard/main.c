@@ -15,11 +15,12 @@ void menu() {
     printf("4. Allocate Pages to Physical Memory\n");
     printf("5. Deallocate Pages from Physical Memory\n");
     printf("6. Access Memory\n");
-    printf("7. Display Statistics\n");
-    printf("8. Print Allocated Virtual Memory\n");
-    printf("9. Print Allocated Physical Memory\n");
-    printf("10. Print Virtual Memory\n");
-    printf("11. Print Physical Memory\n");
+    printf("7. Address Translation\n");
+    printf("8. Display Statistics\n");
+    printf("9. Print Allocated Virtual Memory\n");
+    printf("10. Print Allocated Physical Memory\n");
+    printf("11. Print Virtual Memory\n");
+    printf("12. Print Physical Memory\n");
     printf("-1. Exit\n");
     printf("Enter your choice: ");
 }
@@ -159,23 +160,39 @@ int main() {
                 }
                 break;
 
-            case 7:     // display statistics
+            case 7:     // address translation
+                // enter process id
+                printf("\nEnter Process ID: ");
+                int pid4;
+                scanf("%d", &pid4);
+
+                // enter the virtual address in the form 0vp<page_id>s<offset> e.g. 0vp01s0 for page 1 and offset 0
+                printf("Enter the virtual address in the form 0vp<page_id>s<offset> e.g. 0vp01s0 for page 1 and offset 0: ");
+                char virtualAddress[20];
+                scanf("%s", virtualAddress);
+
+                // call the function to translate the virtual address to physical address
+                translateVirtualToPhysicalAddress(pm, virtualAddress, pid4);
+                num_accesses++; // increment the number of accesses
+                break;
+
+            case 8:     // display statistics
                 displayStatistics(vm, pm);
                 break;
 
-            case 8:     // Print Allocated Virtual Memory
+            case 9:     // Print Allocated Virtual Memory
                 printAllocatedVirtualMemory(vm);
                 break;
 
-            case 9:     // Print Allocated Physical Memory
+            case 10:     // Print Allocated Physical Memory
                 printAllocatedFrameMemory(pm);
                 break;
                 
-            case 10:     // Print Virtual Memory
+            case 11:     // Print Virtual Memory
                 printVirtualMemory(vm);
                 break;
 
-            case 11:     // Print Physical Memory
+            case 12:     // Print Physical Memory
                 printPhysicalMemory(pm);
                 break;
 

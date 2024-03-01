@@ -40,6 +40,7 @@ int findFreeFrame(PhysicalMemory* pm);
 void allocatePagesToPhysicalMemory(Process* process, PhysicalMemory* pm);
 void deallocatePagesFromPhysicalMemory(Process* process, PhysicalMemory* pm);
 int accessMemory(Process* process, int page_id);
+char* translateVirtualToPhysicalAddress(PhysicalMemory* pm, char* virtualAddress, int processId);
 void displayStatistics(VirtualMemory* vm, PhysicalMemory* pm);
 
 #endif // PAGE_TABLE_H

@@ -1,5 +1,7 @@
-#include <stdio.h>  // For printf
-#include "page_table.h"
+#include <stdio.h>              // For printf
+#include <stdlib.h>             // For dynamic memory allocation
+#include <string.h>             // For string manipulation
+#include "page_table.h"     
 #include "virtual_memory.h"
 
 
@@ -279,6 +281,74 @@ int accessMemory(Process* process, int page_id) {
 
     // If the page_id was not found in any PageTableEntry, it's considered an invalid access
     printf("Invalid page ID %d access attempt in process ID %d.\n", page_id, process->id);
+}
+
+// Function to translate all virtual addresses of a process to physical addresses
+char* translateVirtualToPhysicalAddress(PhysicalMemory* pm, char* virtualAddress, int processId) {
+    int pageId, offset;
+    char physicalAddress[20];       // Assuming this is large enough for the physical address format
+
+    // Validate and parse the virtual address
+    if (sscanf(virtualAddress, "0vp%ds%d", &pageId, &offset) != 2) {
+        printf("Invalid virtual address format.\n");
+        return NULL;
+    }
+
+    Process* process = findProcessById(processId);
+    if (!process) {
+        printf("Process with ID %d not found.\n", processId);
+        return NULL;
+    }
+
+    // Lookup the page in the process's page table to find its frame number
+    int frameNum = -1;
+    for (int i = 0; i < process->mpt->count; i++) {
+        for (int j = 0; j < (process->mpt->tables[i]->size + PAGE_SIZE - 1) / PAGE_SIZE; j++) {
+            if (process->mpt->tables[i]->entries[j].page_num == pageId) {
+                frameNum = process->mpt->tables[i]->entries[j].frame_num;
+                break;
+            }
+        }
+        if (frameNum != -1) break;
+    }
+
+    // If the frame number is -1, the page is not in physical memory
+    if (frameNum == -1) {
+        page_faults++;      // Assume entire process loading counts as one page fault for simplicity
+        printf("Page ID %d not found in physical memory for process ID %d.\n", pageId, processId);
+        printf("Do you want to allocate the page to physical memory? (y/n): ");
+        char choice;
+        scanf(" %c", &choice);
+        if (choice == 'y' || choice == 'Y') {
+            allocatePagesToPhysicalMemory(process, pm);
+        } else {
+            return NULL;
+        }
+
+        // Print the physical memory allocation after handling the page fault
+        printf("\nPhysical Memory after handling page fault:\n---------------------------");
+        printAllocatedFrameMemory(pm);
+
+        // Allocate array of strings to hold physical addresses for each page
+        char** physicalAddresses = malloc(NUM_PAGES * sizeof(char*));
+        if (!physicalAddresses) return NULL;
+
+        for (int i = 0; i < process->mpt->count; i++) {
+            for (int j = 0; j < (process->mpt->tables[i]->size + PAGE_SIZE - 1) / PAGE_SIZE; j++) {
+                PageTableEntry entry = process->mpt->tables[i]->entries[j];
+                physicalAddresses[entry.page_num] = malloc(20 * sizeof(char)); // Assuming size is enough for address format
+                snprintf(physicalAddresses[entry.page_num], 20, "0pf%ds0", entry.frame_num);
+            }
+        }
+
+    } else {
+        // Construct the physical address
+        snprintf(physicalAddress, sizeof(physicalAddress), "0pf%ds%d", frameNum, offset);
+        
+        // Return a copy of the physical address
+        char* result = malloc(strlen(physicalAddress) + 1);
+        strcpy(result, physicalAddress);
+    }
 }
 
 // Function to display memory management statistics
