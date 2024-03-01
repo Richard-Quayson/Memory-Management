@@ -22,16 +22,16 @@ Data Structures (2 pts):        (to manage the tables effectively, have a master
 Functions (5 pts):
     define function:
         []  for address translation from virtual to physical adresses       ->      [Asher]
-        []  for page allocation                                             ->      [Fredrick]
-        []  for page deallocation                                           ->      [Fredrick]
+        [done]  for page allocation                                             ->      [Fredrick]
+        [done]  for page deallocation                                           ->      [Fredrick]
         []  to handle page faults                                           ->      [Richard]
-        []  to track free frames                                            ->      [Richard]
-        []  to track allocated frames                                       ->      [Richard]
+        [done]  to track free frames                                            ->      [Richard]
+        [done]  to track allocated frames                                       ->      [Richard]
 
 The Package (5 pts):
     create C program that would allow a user:
-        []  to create processes                                             ->      [Asher]
-        []  allocate the processes to the memory pages defined              ->      [Fredrick]
+        [done]  to create processes                                             ->      [Asher]
+        [done]  allocate the processes to the memory pages defined              ->      [Fredrick]
         []  to perform basic memory management defined by the functions     ->      [Richard]
 
 Memory Address Creation (2 pts):
