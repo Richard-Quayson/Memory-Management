@@ -25,7 +25,7 @@ SecondaryPageTable* allocateSecondaryPageTable(int memorySize) {
     spt->size = memorySize;
     for (int i = 0; i < numEntries; ++i) {
         spt->entries[i].frame_num = -1; // Initially, no frame is allocated
-        spt->entries[i].isvalid = false; // Mark as invalid initially
+        spt->entries[i].is_valid = false; // Mark as invalid initially
         for (int j = 0; j < PAGE_SIZE / KB; ++j) {
             spt->entries[i].chunks[j] = -1; // Mark all chunks as unallocated
         }
@@ -109,7 +109,7 @@ Process* create_process(int id, int memory_size, VirtualMemory* vm) {
                 PageTableEntry* entry = &process->mpt->tables[i]->entries[pageIndex];
                 entry->page_num = pageID; // Set the page number
                 entry->frame_num = -1; // Assuming no physical frame is allocated yet
-                entry->isvalid = true; // Mark as valid since we're allocating memory for it
+                entry->is_valid = true; // Mark as valid since we're allocating memory for it
 
                 // Calculate how many chunks are needed for this secondary table
                 int chunksNeeded = tableSize / CHUNK_SIZE + (tableSize % CHUNK_SIZE != 0);
@@ -171,8 +171,9 @@ void printProcess(const Process* process) {
         printf("            entries: [\n");
         for (int j = 0; j < process->mpt->tables[i]->size / PAGE_SIZE; j++) { // Adjust based on actual structure and needs
             printf("                {\n");
+            printf("                    page_num: %d,\n", process->mpt->tables[i]->entries[j].page_num);
             printf("                    frame_num: %d,\n", process->mpt->tables[i]->entries[j].frame_num);
-            printf("                    isvalid: %s,\n", process->mpt->tables[i]->entries[j].isvalid ? "true" : "false");
+            printf("                    is_valid: %s,\n", process->mpt->tables[i]->entries[j].is_valid ? "true" : "false");
             printf("                    chunks: ");
             printChunks(process->mpt->tables[i]->entries[j].chunks, PAGE_SIZE / KB);
             printf("\n                }");
@@ -204,7 +205,7 @@ void allocatePagesToPhysicalMemory(Process* process, PhysicalMemory* pm) {
         SecondaryPageTable* spt = process->mpt->tables[i];
         for (int j = 0; j < (spt->size + PAGE_SIZE - 1) / PAGE_SIZE; j++) { // Iterate through page table entries
             PageTableEntry* entry = &spt->entries[j];
-            if (entry->isvalid) {
+            if (entry->is_valid) {
                 int frameID = findFreeFrame(pm); // Assume this function finds a free frame and returns its ID, -1 if none found
                 if (frameID != -1) {
                     entry->frame_num = frameID;

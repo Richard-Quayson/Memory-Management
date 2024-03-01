@@ -11,15 +11,15 @@
 
 
 typedef struct PageTableEntry {
-    int page_num;           // ID of the page in the virtual memory
-    int frame_num; // ID in a Frame in the physical memory
-    bool isvalid;  // Indicates if the entry is valid
+    int page_num;               // ID of the page in the virtual memory
+    int frame_num;              // ID in a Frame in the physical memory
+    bool is_valid;              // Indicates if the entry is valid
     int chunks[PAGE_SIZE / KB]; // List of chunk IDs used to store the process
 } PageTableEntry;
 
 typedef struct SecondaryPageTable {
-    PageTableEntry* entries; // Dynamic array of PageTableEntry
-    int size;                // Size of this secondary page table, in bytes
+    PageTableEntry* entries;    // Dynamic array of PageTableEntry
+    int size;                   // Size of this secondary page table, in bytes
 } SecondaryPageTable;
 
 typedef struct MasterPageTable {

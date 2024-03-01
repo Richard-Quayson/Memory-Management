@@ -13,10 +13,10 @@
 #define MB (1024 * KB)
 #define GB (1024 * MB)
 
-// virtual memory space size: 16GB
+// virtual memory space size: 256MB
 #define VIRTUAL_MEMORY_SIZE (256ULL * MB)
 
-// physical memory space size: 4GB
+// physical memory space size: 128MB
 #define PHYSICAL_MEMORY_SIZE (128ULL * MB)
 
 // page size: 4KB

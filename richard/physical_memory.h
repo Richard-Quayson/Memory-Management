@@ -7,15 +7,15 @@
 
 // Define the Frame structure
 typedef struct Frame {
-    int id; // Frame identifier
-    Chunk chunks[FRAME_SIZE / KB]; // Array of chunks within the frame
-    int is_allocated; // 1 if all chunks in the frame are allocated, 0 otherwise
+    int id;                             // Frame identifier
+    Chunk chunks[FRAME_SIZE / KB];      // Array of chunks within the frame
+    int is_allocated;                   // 1 if all chunks in the frame are allocated, 0 otherwise
 } Frame;
 
 // Define the PhysicalMemory structure
 typedef struct PhysicalMemory {
-    Frame frames[NUM_FRAMES]; // Array of frames in physical memory
-    int remaining_memory;     // Remaining memory in physical memory
+    Frame frames[NUM_FRAMES];           // Array of frames in physical memory
+    int remaining_memory;               // Remaining memory in physical memory
 } PhysicalMemory;
 
 // Function prototypes

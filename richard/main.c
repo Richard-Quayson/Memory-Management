@@ -143,7 +143,11 @@ int main() {
                         scanf(" %c", &choice);
                         if (choice == 'y' || choice == 'Y') {
                             allocatePagesToPhysicalMemory(process, pm);
+                        } else {
+                            break;
                         }
+                    } else {
+                        break;
                     }
                     
                     // print the physical memory allocation after the handling of page fault
