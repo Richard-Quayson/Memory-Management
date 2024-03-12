@@ -1,0 +1,84 @@
+If completed, mark  in the box i.e. [] else []
+
+Task format:
+        <task_status>   <task_name>     ->      <assignee>
+e.g.    []              define ...      ->      [Richard]
+
+Tasks:
+Memory sizes (2 pts):
+    [done]  define the size of the virtual memory space     ->      [Richard]
+    [done]  define the size of the physical memory space    ->      [Richard]
+
+Page sizes (3 pts):
+    [done]  define page size                                ->      [Richard]
+    [done]  calculate the number of pages                   ->      [Richard]
+    [done]  calculate the number of frames                  ->      [Richard]
+
+Data Structures (2 pts):        (to manage the tables effectively, have a master table and use the
+                                hierarchical method for the page table)
+    [done]  implement data structure to represent page table                    ->      [Fredrick]
+    [done]  implement data structure to represent physical memory frames        ->      [Fredrick]
+
+Functions (5 pts):
+    define function:
+        []  for address translation from virtual to physical adresses       ->      [Asher]
+        [done]  for page allocation                                             ->      [Fredrick]
+        [done]  for page deallocation                                           ->      [Fredrick]
+        [done]  to handle page faults                                           ->      [Richard]
+        [done]  to track free frames                                            ->      [Richard]
+        [done]  to track allocated frames                                       ->      [Richard]
+
+The Package (5 pts):
+    create C program that would allow a user:
+        [done]  to create processes                                             ->      [Asher]
+        [done]  allocate the processes to the memory pages defined              ->      [Fredrick]
+        [done]  to perform basic memory management defined by the functions     ->      [Richard]
+
+Memory Address Creation (2 pts):
+    []  simulate process accessing memory by generating random 
+        memory addresses to be translated by the paging system              ->      [Richard]
+
+Page Table (2 pts):
+    []  define a page table which implement the address translation 
+        functionality                                                       ->      [Fredrick]
+
+Error Handling (2 pts):
+    [done]  handle page faults by simulating fetching the required page 
+        from secondary storage                                              ->      [Asher]
+
+Accounting Information (2 pts):                                             ->      [Richard]
+    [done]  track statistics like memory utilisation, page faults and hit rate      
+    [done]  display the tracked statistics
+
+System Evaluation (2 pts):                                                  ->      [Asher, Fredrick, Richard]
+    [done]  ensure the program can be tested with different workloads (varying process)
+        sizes and memory access patterns
+
+Page Replacement Algorithms (2 pts):
+    implement different page replacement algorithms:
+        []  FIFO    ->      [Fredrick]
+        []  LRU     ->      [Asher]
+        []  Clock   ->      [Richard]
+
+Code Documentation (2 pts):                                                 ->      [Asher, Fredrick, Richard]
+    []  the C code is well documented with clear comments
+
+Supplementary Documentation (5 pts):                                        ->      [Asher, Fredrick, Richard]
+    a report explaining the:
+        []  design
+        []  implementation
+        []  analysis
+        []  optimisation
+
+        the of memory management system
+
+    []  presentation of project findings
+
+
+Expectations:
+    create x number of processes
+    each x requires some amount of memory space
+    some should use malloc and calloc
+    use page tables for memory allocation
+    when more memory is required by a process, check if available
+    if available, expand the size, else, decline and queue it
