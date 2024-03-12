@@ -23,7 +23,7 @@ and run the following command:
 
 
 ```bash
-gcc -o main main.c physical_memory.c page_table.c virtual_memory.c 
+gcc -o main main.c physical_memory.c page_table.c
 ```
 
 To run the program, execute the compiled binary:
