@@ -82,49 +82,43 @@ Process* create_process(int id, int memory_size, VirtualMemory* vm) {
     process->mpt->tables = (SecondaryPageTable**)malloc(numSecondaryTables * sizeof(SecondaryPageTable*));
     process->mpt->count = numSecondaryTables;
 
-    // Allocate memory and initialize PageTableEntries
+    // allocate PageTableEntries
+    int remaining_memory = memory_size;
     for (int i = 0; i < numSecondaryTables; ++i) {
         int tableSize = (i < numSecondaryTables - 1) ? SECONDARY_TABLE_SIZE : memory_size - i * SECONDARY_TABLE_SIZE;
         process->mpt->tables[i] = allocateSecondaryPageTable(tableSize);
 
-        // allocate PageTableEntries
-        int remaining_memory = memory_size;
-        for (int i = 0; i < numSecondaryTables; ++i) {
-            int tableSize = (i < numSecondaryTables - 1) ? SECONDARY_TABLE_SIZE : memory_size - i * SECONDARY_TABLE_SIZE;
-            process->mpt->tables[i] = allocateSecondaryPageTable(tableSize);
+        int remaining_process_size = tableSize; // Memory remaining to be allocated in this secondary table
+        int allocated_memory = 0; // Track allocated memory in the current secondary table
 
-            int remaining_process_size = tableSize; // Memory remaining to be allocated in this secondary table
-            int allocated_memory = 0; // Track allocated memory in the current secondary table
+        // Calculate the number of pages (PageTableEntries) needed for this SecondaryPageTable
+        int numPagesNeeded = (tableSize + PAGE_SIZE - 1) / PAGE_SIZE;
 
-            // Calculate the number of pages (PageTableEntries) needed for this SecondaryPageTable
-            int numPagesNeeded = (tableSize + PAGE_SIZE - 1) / PAGE_SIZE;
-
-            for (int pageIndex = 0; pageIndex < numPagesNeeded && remaining_process_size > 0; ++pageIndex) {
-                int pageID = allocatePage(vm);
-                if (pageID == -1) {
-                    printf("Failed to allocate enough virtual memory for the process.\n");
-                    return NULL;
-                }
-
-                // Initialize PageTableEntry for the current page
-                PageTableEntry* entry = &process->mpt->tables[i]->entries[pageIndex];
-                entry->page_num = pageID; // Set the page number
-                entry->frame_num = -1; // Assuming no physical frame is allocated yet
-                entry->is_valid = true; // Mark as valid since we're allocating memory for it
-
-                // Calculate how many chunks are needed for this secondary table
-                int chunksNeeded = tableSize / CHUNK_SIZE + (tableSize % CHUNK_SIZE != 0);
-
-                // Allocate chunks within the allocated page
-                allocateChunksInPage(vm, pageID, chunksNeeded, entry);
-                chunksNeeded -= PAGE_SIZE / CHUNK_SIZE; // Update the number of chunks needed
-
-                // Update remaining_memory
-                remaining_memory -= PAGE_SIZE;
-                if (remaining_memory <= 0) break; // Stop if we've allocated enough memory
+        for (int pageIndex = 0; pageIndex < numPagesNeeded && remaining_process_size > 0; ++pageIndex) {
+            int pageID = allocatePage(vm);
+            if (pageID == -1) {
+                printf("Failed to allocate enough virtual memory for the process.\n");
+                return NULL;
             }
 
+            // Initialize PageTableEntry for the current page
+            PageTableEntry* entry = &process->mpt->tables[i]->entries[pageIndex];
+            entry->page_num = pageID; // Set the page number
+            entry->frame_num = -1; // Assuming no physical frame is allocated yet
+            entry->is_valid = true; // Mark as valid since we're allocating memory for it
+
+            // Calculate how many chunks are needed for this secondary table
+            int chunksNeeded = tableSize / CHUNK_SIZE + (tableSize % CHUNK_SIZE != 0);
+
+            // Allocate chunks within the allocated page
+            allocateChunksInPage(vm, pageID, chunksNeeded, entry);
+            chunksNeeded -= PAGE_SIZE / CHUNK_SIZE; // Update the number of chunks needed
+
+            // Update remaining_memory
+            remaining_memory -= PAGE_SIZE;
+            if (remaining_memory <= 0) break; // Stop if we've allocated enough memory
         }
+
     }
 
     printf("\nProcess %d created successfully with %d bytes of memory.\n", id, memory_size);
