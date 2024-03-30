@@ -1,4 +1,4 @@
-If completed, mark  in the box i.e. [] else []
+If completed, mark done in the box i.e. [done] else []
 
 Task format:
         <task_status>   <task_name>     ->      <assignee>
